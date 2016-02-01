@@ -276,6 +276,156 @@ This will have a user unfollow an account regardless of the tier they are on
         }
     }
 
+## /account/{accountId}/store/item/create
+`POST /account/{accountId}/store/item/create`
+Creates a new store item, its child options and a base image for this store item. In the case of a physical store item it also configures the shipping price handlers for this new store item.
+
+### POST Parameters
+`store_item` _(required)_
+
+    an object containing all information to be associated with this store item
+
+`store_item[options]` _(required for store_item[type] set to: PHYSICAL or EXPERIENCE)_
+
+    an array of objects representing each option (for a t-shirt each option may represent a size, a color, or a combination of the two, etc)
+
+    Each element in this array may contain the following fields:
+
+    `name` _(required)_
+
+        the name to display when there are multiple options under the store item
+
+    `sku` _(optional default: Generated)_
+
+        an identifier used to distinguish between this option and other options under the same store item
+
+    `vendor_sku` _(optional default: null)_
+
+        an identifier used for Purchase Order generation, useful if the Vendor providing this merchandise has a different SKU system from your system
+
+    `upc` _(optional default: null)_
+
+        an identifier used to submit download/sales information to SoundScan or Buzz Angle
+
+    `quantity` _(optional default: null)_
+
+        null or a non-negative integer representing how much stock is currently on hand
+
+    `low_stock_threshold` _(optional default: 10)_
+
+        a non-negative integer representing how much stock should been on hand before the StageBloc system attempts to remind you that stock is low
+
+    `additional_price` _(optional default: 0)_
+
+        a non-negative integer representing the additional price to charge if this option is selected by the user (useful if an XXL t-shirt is more expensive than other variations, for example)
+
+    `weight` _(required for store_item[type] set to: PHYSICAL)_
+
+        a non-negative decimal number indicating the weight in OUNCES of this option (used for shipping price calculation)
+
+    `height` _(required for store_item[type] set to: PHYSICAL)_
+
+        a non-negative decimal number indicating the height in INCHES of this option (used for shipping price calculation)
+
+    `width` _(required for store_item[type] set to: PHYSICAL)_
+
+        a non-negative decimal number indicating the width in INCHES of this option (used for shipping price calculation)
+
+    `length` _(required for store_item[type] set to: PHYSICAL)_
+
+        a non-negative decimal number indicating the length in INCHES of this option (used for shipping price calculation)
+
+    `sort_order` _(optional default: generated end of list)_
+
+        a non-negative integer representing the position to display this option relative to other options
+
+    `cost_of_goods` _(optional default: null)_
+
+        a non-negative decimal representing the cost to purchase this item from your vendor, used in generating Purchase Orders
+
+    `back_stock_count` _(optional default: null)_
+
+        null or a non-negative integer representing how many back orders you are willing to accept once there are no longer any more of this item ON HAND.
+
+    `status` _(optional default: NORMAL)_
+
+        a string representing the status for this option, one of: NORMAL, DISABLED
+
+`store_item[shipping_price_handlers]` _(required for store_item[type] set to: PHYSICAL)_
+
+    an array of objects representing each shipping price handler to be offered to a user attempting to purchase this item. The object may include additional handling fees and options depending on the type of handler indicated.
+
+    Each element in this array may contain the following fields:
+
+    `name` _(required)_
+
+        a string identifying which Shipping Price Handler to enable, one of: FLAT_RATE, USPS, TOWNSEND, BELLTOWER, RLP, FEDEX, CUSTOM_TABLE, PICK_UP, DELIVERY_AGENT, UPS
+
+    `price` _(optional)_
+
+        a non-negative integer, an additional price on top of the charges indicated by APIs for USPS, UPS, and FEDEX. For FLAT_RATE, this is the amount to charge a user selecting this shipping method.
+
+    `media-mail` _(optional applies to USPS only)_
+
+        a boolean, true if you want to offer USPS Media Mail pricing for this item
+
+`store_item[type]` _(required)_
+
+    a string indicating the type of store item to create, currently supported: PHYSICAL, EXPERIENCE
+
+`store_item[price]` _(required)_
+
+    a decimal number indicating the base price for this store item
+
+`store_item[sort_order]` _(optional default: append to end of list)_
+
+    an integer indicating the position relative to the other store items
+
+`store_item[title]` _(required)_
+
+    a string (up to 150 characters) representing the title of the store item
+
+`store_item[description]`
+
+    a string representing the description of the store item (html supported, script tags will be stripped)
+
+`store_item[category]`
+
+    a string representing a category in which to group this store item
+
+`store_item[status]` _(optional default: OKAY)_
+
+    a string representing the status of the store item, one of: OKAY, PRIVATE, SOLD_OUT
+
+`store_item[exclusive]` _(optional default: false)_
+
+    a boolean, true if this should only be presented to users who are following the account
+
+`store_item[featured]` _(optional default: false)_
+
+    a boolean, true if this should be considered a FEATURED item (Accessible through some special SB Theme Engine Modules)
+
+`store_item[fulfiller_id]` _(required for store_item[type] set to: PHYSICAL)_
+
+    an integer ID for a fulfiller already configured in StageBloc which is associated with this account
+
+`store_item[vendor_id]` _(optional for store_item[type] set to: PHYSICAL default: null)_
+
+    an integer ID for a vendor already configured in StageBloc which is associated with this account
+
+`store_item[unpublish_date]` _(optional default: null)_
+
+    a datetime representing when this store item should be removed from the store (state will be set to PRIVATE if status is OKAY)
+
+`store_item[unpublish_date_timezone]` _(optional default: null)_
+
+    a string representing the timezone the unpublish date is to be considered from. one of:
+
+`store_item[lock_time]` _(optional default: null)_
+
+    an integer representing the number of SECONDS this item can be sitting in a cart before it is removed and the user must re-add it to the cart in order to complete their purchase. (Useful for high turnover items or specialty items with low stock)
+
+
 ## /content
 `[GET] /account/{accountId}/content`  
 Gets an activity stream of recent content from the account.
